@@ -2,7 +2,7 @@ from modules.speech import SpeechHandler
 from modules.commands import BasicCommands
 from modules.notepad import NotepadHandler
 from modules.weather import WeatherHandler
-from modules.ai_query import AIQueryHandler
+from modules.ai_query import chatBot
 from modules.phone_display import PhoneDisplayHandler
 from modules.utils import find_application
 import subprocess
@@ -10,15 +10,13 @@ import subprocess
 class AIAssistant:
     def __init__(self, window):
         self.window = window
-        self.api_key = "your_api_key"  # Replace with your Hugging Face API key
-        self.weather_api_key = "f9509fb5a6f0ffa45ca90b659d12eea5"  # Replace with your OpenWeather API key
+        self.weather_api_key = "your_weather_api_key"  # Replace with your OpenWeather API key
 
         # Initialize handlers
         self.speech_handler = SpeechHandler()
         self.basic_commands = BasicCommands(self.speech_handler)
         self.notepad_handler = NotepadHandler(self.speech_handler)
         self.weather_handler = WeatherHandler(self.speech_handler, self.weather_api_key)
-        self.ai_query_handler = AIQueryHandler(self.speech_handler, self.api_key)
         self.phone_display_handler = PhoneDisplayHandler(self.speech_handler)
 
     async def execute_command_async(self, command):
@@ -28,7 +26,6 @@ class AIAssistant:
         print(f"Executing: {command}")
 
         try:
-            # Notepad-related commands
             if 'open notepad' in command:
                 await self.notepad_handler.start_notepad_dictation()
 
@@ -82,10 +79,6 @@ class AIAssistant:
             elif 'what\'s the weather' in command:
                 await self.weather_handler.get_weather_async()
 
-            # AI query commands
-            elif any(keyword in command for keyword in ['explain', 'what is', 'who is', 'tell me about']):
-                await self.ai_query_handler.process_ai_query(command)
-
             # Phone display commands
             elif 'display my phone' in command:
                 await self.phone_display_handler.display_phone()
@@ -93,9 +86,9 @@ class AIAssistant:
             elif 'stop display' in command:
                 self.phone_display_handler.stop_display()
 
-            # Unknown commands
+            # Default case: Pass any other command to the chatBot function
             else:
-                self.speech_handler.speak("Sorry, I don't understand that command.")
+                chatBot(command)
 
         except Exception as e:
             print(f"Command execution error: {e}")

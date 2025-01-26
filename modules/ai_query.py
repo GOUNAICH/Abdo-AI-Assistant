@@ -1,28 +1,72 @@
 import requests
-import asyncio
+import json
+import os
+from modules.speech import SpeechHandler
 
-class AIQueryHandler:
-    def __init__(self, speech_handler, api_key):
-        self.speech_handler = speech_handler
-        self.api_key = api_key
+speech_handler = SpeechHandler()
 
-    async def process_ai_query(self, query):
-        try:
-            formatted_query = f"Q: {query}\nA: Give a brief, factual answer in one sentence:"
-            api_url = "https://api-inference.huggingface.co/models/google/flan-t5-base"
-            headers = {"Authorization": f"Bearer {self.api_key}"}
-            payload = {
-                "inputs": formatted_query,
-                "parameters": {"max_length": 50, "temperature": 0.7}
-            }
+def chatBot(query):
 
-            response = await asyncio.to_thread(requests.post, api_url, headers=headers, json=payload)
-            if response.status_code == 200:
-                answer = response.json()[0]["generated_text"].strip()
-                self.speech_handler.speak(answer)
-            else:
-                self.speech_handler.speak("Sorry, I couldn't process your request")
+    MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    API_URL = f"https://api-inference.huggingface.co/models/{MODEL}"
 
-        except Exception as e:
-            print(f"AI query error: {e}")
-            self.speech_handler.speak("Sorry, an error occurred")
+    TOKEN_PATH = "engine/hf_token.txt"
+    if os.path.exists(TOKEN_PATH):
+        with open(TOKEN_PATH, 'r') as file:
+            HF_TOKEN = file.read().strip()
+    else:
+        raise FileNotFoundError("HuggingFace token file not found")
+
+    headers = {
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+
+    payload = {
+        "inputs": query,
+        "parameters": {
+            "max_new_tokens": 500
+        }
+    }
+
+    try:
+        # Send the API request
+        response = requests.post(API_URL, headers=headers, json=payload)
+        response.raise_for_status() 
+
+        # Parse the response
+        result = response.json()[0]['generated_text']
+
+        # Clean up the response
+        if result.startswith(query):
+            result = result[len(query):].strip() 
+
+
+        result = result.split(result)[0].strip() if result.count(result) > 1 else result
+
+        result = result.replace("?", "").strip()  # Remove "?"
+        result = result.replace("\n", " ").strip()  # Remove newlines
+        result = result.replace("</think>", "").strip()  # Remove </think> if present
+
+        speech_handler.speak(result)
+
+        return result
+
+    except requests.exceptions.RequestException as e:
+        
+        print(f"API Request Error: {e}")
+        speech_handler.speak("Sorry, there was an error processing your request.")
+        return "Sorry, there was an error processing your request."
+    
+    
+
+#  def chatBot(query):
+#    user_input = query.lower()
+#    chatbot = hugchat.ChatBot(cookie_path="engine\cookies.json")
+#    id = chatbot.new_conversation()
+#    chatbot.change_conversation(id)
+#    response =  chatbot.chat(user_input)
+#    print(response)
+#    speech_handler.speak(response)
+#    return response
