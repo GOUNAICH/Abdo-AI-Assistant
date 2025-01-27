@@ -2,7 +2,7 @@ import requests
 import os
 
 API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-base"
-headers = {"Authorization": "Bearer your_api_key_huggingface"}
+headers = {"Authorization": "Bearer your_api key"}
 
 def query(filename):
     try:

@@ -5,6 +5,7 @@ from modules.weather import WeatherHandler
 from modules.ai_query import chatBot
 from modules.phone_display import PhoneDisplayHandler
 from modules.utils import find_application
+from modules.img_generate import generate_img
 import subprocess
 
 class AIAssistant:
@@ -85,6 +86,14 @@ class AIAssistant:
 
             elif 'stop display' in command:
                 self.phone_display_handler.stop_display()
+                
+                
+            elif "generate image for" in command:
+                filename = generate_img(command)
+                if filename:
+                    self.speech_handler.speak(f"Image generated and saved as {filename}.")
+                else:
+                    self.speech_handler.speak("Sorry, I couldn't generate the image.")
 
             # Default case: Pass any other command to the chatBot function
             else:

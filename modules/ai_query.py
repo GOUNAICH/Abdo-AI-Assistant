@@ -7,7 +7,7 @@ speech_handler = SpeechHandler()
 
 def chatBot(query):
 
-    MODEL = "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B"
+    MODEL = "mistralai/Mistral-Nemo-Instruct-2407"
     API_URL = f"https://api-inference.huggingface.co/models/{MODEL}"
 
     TOKEN_PATH = "engine/hf_token.txt"
@@ -26,7 +26,7 @@ def chatBot(query):
     payload = {
         "inputs": query,
         "parameters": {
-            "max_new_tokens": 500
+            "max_new_tokens": 100
         }
     }
 

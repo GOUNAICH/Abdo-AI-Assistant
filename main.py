@@ -14,7 +14,7 @@ async def main():
     asyncio.set_event_loop(loop)
 
     assistant = AIAssistant(window)
-    assistant.speech_handler.speak("Hello, I'm your AI assistant, Abdo. How can I assist you today?")
+    assistant.speech_handler.speak("Hello, How can I assist you today?")
 
     try:
         while True:

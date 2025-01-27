@@ -1,1 +1,1 @@
-your_api_Huggingface
+Your_api_key
